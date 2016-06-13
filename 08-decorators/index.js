@@ -5,8 +5,9 @@ var escape = require('escape-html');
 var app = module.exports = koa();
 
 app.use(function* (next) {
-  yield next;
+  yield* next;
   // add some logic here!
+  this.body = escape(this.body);
 })
 
 app.use(function* body() {
