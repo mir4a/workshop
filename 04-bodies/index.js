@@ -11,9 +11,8 @@ var app = module.exports = koa();
 
 app.use(function* (next) {
   if (this.request.path !== '/stream') return yield* next;
-  var stream = fs.readFileSync(__filename);
   this.response.type = 'application/javascript';
-  this.response.body = stream;
+  this.response.body =  fs.createReadStream(__filename);
 });
 
 /**
