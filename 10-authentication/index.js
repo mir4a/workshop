@@ -12,6 +12,7 @@ var form = fs.readFileSync(path.join(__dirname, 'form.html'), 'utf8');
 
 // adds .csrf among other properties to `this`.
 csrf(app);
+// app.use(csrf());
 
 // use koa-session somewhere at the top of the app
 app.use(session());
@@ -34,6 +35,46 @@ app.use(function* home(next) {
 app.use(function* login(next) {
   if (this.request.path !== '/login') return yield* next;
   if (this.request.method === 'GET') return this.response.body = form.replace('{{csrf}}', this.csrf);
+  if (this.request.method === 'POST') {
+    var body = yield parse(this);
+
+    try {
+      this.assertCSRF(body);
+    } catch (err) {
+      this.status = 403;
+      this.body = {
+        message: 'This CSRF token is invalid'
+      }
+      return
+    }
+
+    console.log(body);
+
+
+    if ('username' === body.username && 'password' === body.password) {
+      this.session.authenticated = true;
+      this.response.status = 303;
+      this.redirect('/');
+    } else {
+      this.throw(400);
+    }
+
+    // if (body._csrf) {
+    //   if (body._csrf !== this.csrf) {
+    //     console.log(body._csrf);
+    //     console.log(this.csrf);
+    //     this.throw(403);
+    //   } else {
+    //       this.throw(400);
+    //     } else {
+    //       this.throw(303);
+    //     }
+    //     console.log(body);
+    //   }
+    // } else {
+    //   this.throw(403)
+    // }
+  }
 
 })
 
@@ -45,6 +86,10 @@ app.use(function* login(next) {
 
 app.use(function* logout(next) {
   if (this.request.path !== '/logout') return yield* next;
+
+  this.session.authenticated = null;
+  this.response.status = 303;
+  this.redirect('/login');
 
 })
 
