@@ -48,8 +48,6 @@ app.use(function* login(next) {
       return
     }
 
-    console.log(body);
-
 
     if ('username' === body.username && 'password' === body.password) {
       this.session.authenticated = true;
@@ -58,22 +56,6 @@ app.use(function* login(next) {
     } else {
       this.throw(400);
     }
-
-    // if (body._csrf) {
-    //   if (body._csrf !== this.csrf) {
-    //     console.log(body._csrf);
-    //     console.log(this.csrf);
-    //     this.throw(403);
-    //   } else {
-    //       this.throw(400);
-    //     } else {
-    //       this.throw(303);
-    //     }
-    //     console.log(body);
-    //   }
-    // } else {
-    //   this.throw(403)
-    // }
   }
 
 })
